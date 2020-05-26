@@ -14,55 +14,53 @@ void setup() {
   dht.begin();
 }
 
-  float tList[20];
+  float tArr[100];
+  float hArr[100];
   int i = 0;
   int trigger;
-  bool isWrapped = false;
+  bool isReading = false;
 
 
-void populateArray(float data, float *dataArr){     //populate the array with data
-  if (i<20){        // populate the array
+void * populateArray(float data, float *dataArr){     //populate the array with data
     dataArr[i++] = data;
-  }
-  else {        //overwrite the array (clear)
-    isWrapped = true;
-    i = 0;
-    dataArr[i++] = data;
-  }
+    return dataArr;
 }
 
-void printData(char *s, float *dataArr) {     ////send data over to Python program (serial monitor)
-  Serial.print(s);
+void printData(float *dataArr) {     ////send data over to Python program (serial monitor)
   int j;
-  if (isWrapped){
-    for(j = i; j < 20; j++){        //print the newest data from index i to 19 
-      Serial.print(dataArr[j]);
-      Serial.print(",");  
-    }
-  }
   for (j = 0; j < i; j++){       //print the newest data from index 0 to i
-    Serial.print(dataArr[j]);
+    Serial.print(dataArr[j]);    //dereferencing pointer and extracting value
     Serial.print(",");
   }
+  Serial.print("\n");
 }
   
 void loop() {
-  
   delay(2000);
   int readData = dht.read(dataPin);     //read the data from the sensor
-
-  float t = dht.readTemperature();      //read the temperature
-  if (isnan(t)){
-      Serial.println(F("\n\nFailed to read from the sensor\n"));
-  }
-
-  populateArray(t, tList);      //populate the array with data
   
   if(Serial.available()){      //handle requests from Python program
    trigger = Serial.read();
   }
-  if(trigger == '1'){
-    printData("\nTemperature: ", tList);      //send data over to Python program (serial monitor)
+  
+  
+  if(trigger == '1'){       //start logging
+    isReading = true;
+  }
+  if(trigger == '2'){       //stop logging
+    isReading = false;
+  }  
+  if(trigger == '3'){
+    printData(/*"\nTemperature: ", */tArr);      //send data over to Python program (serial monitor)
+    memset(tArr, 0, sizeof(tArr));        //clear the array after sending the data
+  }
+
+  if (isReading){
+    float t = dht.readTemperature();      //read the temperature
+    if (isnan(t)){
+        Serial.println(F("\n\nFailed to read from the sensor\n"));
+    }
+    populateArray(t, tArr);      //populate the array with data
   }
 }
 
