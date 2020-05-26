@@ -1,35 +1,34 @@
 //Requires DHT sensor library https://github.com/adafruit/DHT-sensor-library
 
-#include <DHT.h>    //humidity and temperature censor library
+#include <DHT.h>                        //humidity and temperature censor library
 #include <DHT_U.h>
 
-#define dataPin 8     //define pin no. connected to censor
-#define dhtType DHT22     //define type of sensor
+#define dataPin 8                       //define pin no. connected to censor
+#define dhtType DHT22                   //define type of sensor
 
-DHT dht(dataPin, dhtType);      //create DHT object
+DHT dht(dataPin, dhtType);              //create DHT object
 
 void setup() {
 
-  Serial.begin(9600);     //open serial port, sets data rate to 9600 bps
+  Serial.begin(9600);                   //open serial port, sets data rate to 9600 bps
   dht.begin();
 }
-
-  float tArr[100];
-  float hArr[100];
+  float data;
+  float arr[100];
   int i = 0;
   int trigger;
   bool isReading = false;
-
+  bool isTemperatureSensor;
 
 void * populateArray(float data, float *dataArr){     //populate the array with data
     dataArr[i++] = data;
     return dataArr;
 }
 
-void printData(float *dataArr) {     ////send data over to Python program (serial monitor)
+void printData(float *dataArr) {        //send data over to Python program (serial monitor)
   int j;
-  for (j = 0; j < i; j++){       //print the newest data from index 0 to i
-    Serial.print(dataArr[j]);    //dereferencing pointer and extracting value
+  for (j = 0; j < i; j++){              //print the newest data from index 0 to i
+    Serial.print(dataArr[j]);           //dereferencing pointer and extracting value
     Serial.print(",");
   }
   Serial.print("\n");
@@ -39,28 +38,40 @@ void loop() {
   delay(2000);
   int readData = dht.read(dataPin);     //read the data from the sensor
   
-  if(Serial.available()){      //handle requests from Python program
-   trigger = Serial.read();
-  }
-  
-  
-  if(trigger == '1'){       //start logging
-    isReading = true;
-  }
-  if(trigger == '2'){       //stop logging
-    isReading = false;
-  }  
-  if(trigger == '3'){
-    printData(/*"\nTemperature: ", */tArr);      //send data over to Python program (serial monitor)
-    memset(tArr, 0, sizeof(tArr));        //clear the array after sending the data
+  if(Serial.available()){               //handle requests from Python program
+    trigger = Serial.read();
   }
 
+  
+  if(trigger == '1'){                   // choose the temperature sensor
+    isTemperatureSensor = true;              
+  }
+  if(trigger == '2'){                   // choose the humidity sensor
+    isTemperatureSensor = false;       
+  }
+  if(trigger == '3'){                   //start logging
+    isReading = true;
+  }
+  if(trigger == '4'){                   //stop logging
+    isReading = false;
+  }  
+  if(trigger == '5'){
+    printData(arr);                     //send data over to Python program (serial monitor)
+    memset(arr, 0, sizeof(arr));        //clear the array after sending the data
+  }
+ 
+
   if (isReading){
-    float t = dht.readTemperature();      //read the temperature
-    if (isnan(t)){
+      if (isTemperatureSensor){
+        data = dht.readTemperature();  
+      }
+      if (!isTemperatureSensor){
+        data = dht.readHumidity();  
+      }
+      if (isnan(data)){
         Serial.println(F("\n\nFailed to read from the sensor\n"));
-    }
-    populateArray(t, tArr);      //populate the array with data
+      }      
+      populateArray(data, arr); 
   }
 }
 
