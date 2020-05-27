@@ -1,5 +1,4 @@
 //Requires DHT sensor library https://github.com/adafruit/DHT-sensor-library
-
 #include <DHT.h>                        //humidity and temperature censor library
 #include <DHT_U.h>
 
@@ -12,17 +11,20 @@ void setup() {
 
   Serial.begin(9600);                   //open serial port, sets data rate to 9600 bps
   dht.begin();
+
 }
-  float data;
-  float arr[100];
-  int i = 0;
-  int trigger;
-  bool isReading = false;
-  bool isTemperatureSensor;
+
+  float data;                           //one read from a sensor
+  float arr[100];                       //array filled with data collected between start and stop logging triggers
+  int i = 0;                            //index helper used in populateArray() and printData()
+  int trigger;                          //Python request handler
+  bool isReading = false;               //whether the sensor is logging or not
+  bool isTemperatureSensor;             //whether the sensor is measuring temperature or humidity
+  
 
 void * populateArray(float data, float *dataArr){     //populate the array with data
-    dataArr[i++] = data;
-    return dataArr;
+  dataArr[i++] = data;
+  return dataArr;
 }
 
 void printData(float *dataArr) {        //send data over to Python program (serial monitor)
@@ -36,6 +38,7 @@ void printData(float *dataArr) {        //send data over to Python program (seri
   
 void loop() {
   delay(2000);
+
   int readData = dht.read(dataPin);     //read the data from the sensor
   
   if(Serial.available()){               //handle requests from Python program
@@ -61,17 +64,17 @@ void loop() {
   }
  
 
-  if (isReading){
-      if (isTemperatureSensor){
-        data = dht.readTemperature();  
-      }
-      if (!isTemperatureSensor){
-        data = dht.readHumidity();  
-      }
-      if (isnan(data)){
-        Serial.println(F("\n\nFailed to read from the sensor\n"));
-      }      
-      populateArray(data, arr); 
+  if (isReading){                       //select sensor based on the trigger
+    if (isTemperatureSensor){
+      data = dht.readTemperature();  
+    }
+    if (!isTemperatureSensor){
+      data = dht.readHumidity();  
+    }
+    if (isnan(data)){
+      Serial.println(F("\n\nFailed to read from the sensor\n"));
+    }      
+    populateArray(data, arr);           //returns array that is passed in the printData(arr)
   }
 }
 
