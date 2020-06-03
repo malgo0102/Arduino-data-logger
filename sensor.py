@@ -3,6 +3,7 @@ import serial
 import time
 import pandas as pd                 #for parsing .csv file
 import os
+import datetime
        
 
 arduino = serial.Serial('COM10', 9600)          # create Serial port object called arduino with correct port and baudrate
@@ -107,11 +108,11 @@ def writeToFile():
     msg = arduino.readline()
     decodedLine = msg.decode('utf-8')
     print (decodedLine)                 # decode the b'\n'
-
+    timestamp = datetime.datetime.now()
+    
     file = open(filename, "a+")         #open a file for writing and create if it doesn't exist
-    file.write(decodedLine)             #write data to the file
+    file.write(str(timestamp) + "," + decodedLine)             #write data to the file
     file.close()                        #close the file when done
-
 
 print("\t*******************************\n\tHumidity and temperature sensor\n\t*******************************\n")
 start(sensor1,sensor2)
