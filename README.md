@@ -5,7 +5,7 @@
 - Communicates with PC over serial port
 - Saves data to a file
 
-### I used:
+## I used:
 - Python for UI 
 - DHT22 sensor to read temperature and humidity data.
 
@@ -16,7 +16,6 @@ Data is saved with a timestamp to:
 Example of a single data reading: 2020-06-03 23:58:51.973248,23.10,23.20,
 
 ## Getting started:
-1.
 1. Install Matplotlib:
     - https://matplotlib.org/users/installing.html
 
@@ -29,6 +28,6 @@ Example of a single data reading: 2020-06-03 23:58:51.973248,23.10,23.20,
     - https://github.com/adafruit/DHT-sensor-library
 
 5. Run the program in the root directory: 
-- python sensor.py
+    - python sensor.py
 
 //malg0102
