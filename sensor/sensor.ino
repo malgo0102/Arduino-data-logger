@@ -22,12 +22,12 @@ void setup() {
   bool isTemperatureSensor;             //whether the sensor is measuring temperature or humidity
   
 
-void * populateArray(float data, float *dataArr){     //populate the array with data
+void/***/ populateArray(float data, float* dataArr){     //populate the array with data
   dataArr[i++] = data;
-  return dataArr;
+  //return dataArr;
 }
 
-void printData(float *dataArr) {        //send data over to Python program (serial monitor)
+void printData(float* dataArr) {        //send data over to Python program (serial monitor)
   int j;
   for (j = 0; j < i; j++){              //print the newest data from index 0 to i
     Serial.print(dataArr[j]);           //dereferencing pointer and extracting value
@@ -44,7 +44,7 @@ void loop() {
   if(Serial.available()){               //handle requests from Python program
     trigger = Serial.read();
   }
-
+//char reevaluates to a number ___ 0-255 why i have int trigger but it takes a char, ints are faster, but take more space
   
   if(trigger == '1'){                   // choose the temperature sensor
     isTemperatureSensor = true;              
